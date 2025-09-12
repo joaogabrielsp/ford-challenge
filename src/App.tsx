@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Sidebar from "./components/Sidebar";
+import TestCards from "./components/TestCards"
 import type { Project, Screen, TestCase } from "./types";
 
 // Mock project
@@ -9,13 +10,14 @@ const mockProject: Project = {
   legacyPath: "/legacy/ecommerce",
   newPath: "/new/ecommerce",
   createdAt: new Date("2024-01-15"),
-}
+};
 
 const mockGeneratedTests: TestCase[] = [
   {
     id: "1",
     name: "User Authentication Test",
-    description: "Validates user login functionality between legacy and new systems",
+    description:
+      "Validates user login functionality between legacy and new systems",
     status: "pending",
   },
   {
@@ -48,13 +50,14 @@ const mockGeneratedTests: TestCase[] = [
     description: "Tests product search results consistency",
     status: "pending",
   },
-]
+];
 
 const mockTestResults: TestCase[] = [
   {
     id: "1",
     name: "User Authentication Test",
-    description: "Validates user login functionality between legacy and new systems",
+    description:
+      "Validates user login functionality between legacy and new systems",
     status: "passed",
     legacyOutput: '{"success": true, "token": "abc123"}',
     newOutput: '{"success": true, "token": "abc123"}',
@@ -105,11 +108,16 @@ const mockTestResults: TestCase[] = [
     newOutput: '{"results": 15, "query": "laptop"}',
     executionTime: 98,
   },
-]
+];
 
 const singleTestResults: Record<
   string,
-  { status: "passed" | "failed"; executionTime: number; legacyOutput?: string; newOutput?: string }
+  {
+    status: "passed" | "failed";
+    executionTime: number;
+    legacyOutput?: string;
+    newOutput?: string;
+  }
 > = {
   "1": {
     status: "passed",
@@ -147,38 +155,119 @@ const singleTestResults: Record<
     legacyOutput: '{"results": 15, "query": "laptop"}',
     newOutput: '{"results": 15, "query": "laptop"}',
   },
-}
+};
 
 function App() {
-  const [currentProject, setCurrentProject] = useState<Project | null>(mockProject)  
+  const [currentProject, setCurrentProject] = useState<Project | null>(mockProject)
   const [currentScreen, setCurrentScreen] = useState<Screen>("generated-tests")
+  const [tests, setTests] = useState<TestCase[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [isRunning, setIsRunning] = useState(false)
 
   const handleRegisterProject = () => {
     // Simulate project registration
-    alert("Project registration modal would open here")
-  }
+    alert("Project registration modal would open here");
+  };
 
   const handleGenerateTests = () => {
-    setCurrentScreen("generated-tests")
-    setIsGenerating(true)
-  }
+    setCurrentScreen("generated-tests");
+    setIsGenerating(true);
+
+    // Simulate test generation
+    setTimeout(() => {
+      setTests(mockGeneratedTests)
+      setIsGenerating(false)
+    }, 2000)
+  };
 
   const handleRunTests = () => {
-    setCurrentScreen("test-results")
-    setIsRunning(true)
+    setCurrentScreen("test-results");
+    setIsRunning(true);
+
+    // Simulate test execution
+    setTimeout(() => {
+      setTests(mockTestResults)
+      setIsRunning(false)
+    }, 3000)
+  };
+
+  const handleRunSingleTest = (testId: string) => {
+    setTests((prevTests) =>
+      prevTests.map((test) => (test.id === testId ? { ...test, status: "running" as const } : test)),
+    )
+
+    setTimeout(() => {
+      const result = singleTestResults[testId]
+      setTests((prevTests) =>
+        prevTests.map((test) =>
+          test.id === testId
+            ? {
+                ...test,
+                status: result.status,
+                executionTime: result.executionTime,
+                legacyOutput: result.legacyOutput,
+                newOutput: result.newOutput,
+              }
+            : test,
+        ),
+      )
+    }, 2000)
   }
-  
-  
-  return(
-    <Sidebar
-    currentProject={currentProject}
-    currentScreen={currentScreen}
-    onRegisterProject={handleRegisterProject}
-    onGenerateTests={handleGenerateTests}
-    onRunTests={handleRunTests}
-    />
-  )
+
+  const displayTests = isGenerating || isRunning ? [] : tests
+
+  return (
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar
+        currentProject={currentProject}
+        currentScreen={currentScreen}
+        onRegisterProject={handleRegisterProject}
+        onGenerateTests={handleGenerateTests}
+        onRunTests={handleRunTests}
+      />
+
+      <div className="flex-1 flex flex-col">
+        {isGenerating && (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <h3 className="text-lg font-medium text-gray-900">
+                Generating Tests...
+              </h3>
+              <p className="text-gray-600">
+                AI is analyzing your code and creating test cases
+              </p>
+            </div>
+          </div>
+        )}
+
+        {isRunning && (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+              <h3 className="text-lg font-medium text-gray-900">
+                Running Tests...
+              </h3>
+              <p className="text-gray-600">
+                Executing tests and comparing outputs
+              </p>
+            </div>
+          </div>
+        )}
+
+        {!isGenerating && !isRunning && (
+          <TestCards
+            tests={displayTests}
+            currentScreen={currentScreen}
+            onRunSingleTest={
+              currentScreen === "generated-tests"
+                ? handleRunSingleTest
+                : undefined
+            }
+          />
+        )}
+      </div>
+    </div>
+  );
 }
 export default App;
