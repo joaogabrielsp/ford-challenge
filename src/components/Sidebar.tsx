@@ -4,7 +4,6 @@ import type { Project, Screen } from "../types";
 interface SidebarProps{
   currentProject: Project | null
   currentScreen: Screen
-  onScreenChange: (screen: Screen) => void
   onRegisterProject: () => void
   onGenerateTests: () => void
   onRunTests: () => void
@@ -12,7 +11,6 @@ interface SidebarProps{
 const Sidebar: React.FC<SidebarProps> = ({
   currentProject,
   currentScreen,
-  onScreenChange,
   onRegisterProject,
   onGenerateTests,
   onRunTests,
@@ -58,7 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             disabled={!currentProject}
             className={`w-full py-2 px-4 rounded-lg transition-colors ${
               currentScreen === "generated-tests"
-                ? "bg-green-600 text-white"
+                ? "bg-green-600 hover:bg-green-700 text-white"
                 : currentProject
                 ? "bg-gray-700 hover:bg-gray-600 text-white"
                 : "bg-gray-800 text-gray-500 cursor-not-allowed"

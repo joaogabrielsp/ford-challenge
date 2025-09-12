@@ -37,7 +37,6 @@ function App() {
     <Sidebar
     currentProject={currentProject}
     currentScreen={currentScreen}
-    onScreenChange={setCurrentScreen}
     onRegisterProject={handleRegisterProject}
     onGenerateTests={handleGenerateTests}
     onRunTests={handleRunTests}
